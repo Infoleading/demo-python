@@ -1,15 +1,15 @@
-
+# 结点数据结构
 class decision_node:
     def __init__(slef, col=-1, value=None, results=None, tb=None, fb=None):
-        self.col = col
-        self.value = value
-        self.results = results
-        self.tb = tb
-        self.fb = fb
+        self.col = col # 属性列值
+        self.value = value # 判定条件值（一般是判定为True的值）
+        self.results = results # 标签值，除叶结点外，其它结点都为None值
+        self.tb = tb # true 子树
+        self.fb = fb # false 子树
     
-    # 数据集划分函数
-    # 根据某一列的值将数据划分成两个集合
-    # 处理数值数据和字符串数据
+# 数据集划分函数
+# 根据某一列的值将数据划分成两个集合
+# 处理数值数据和字符串数据
 def divide_set(rows, column, value):
     # 定义一lambda函数，用于划分判断 
     split_function = None
@@ -24,6 +24,9 @@ def divide_set(rows, column, value):
     set2 = [row for row in rows if not split_function(row)]
     return (set1, set2)
 
+
+#结果值计数
+#从分类结果中找出每种结果的个数
 def unique_counts(rows):
     results = {} # 用字典来保存各种结果的计数
     for row in rows:
@@ -32,6 +35,19 @@ def unique_counts(rows):
             results[r] = 0 # 初始化字典项，key=r  value=0
         results[r]+=1 # 按key值r来索引value并+1
     return results
+    
+#基尼不纯度
+def gini_impurity(rows):
+    total = len(rows)
+    lab_counts = unique_counts(rows)
+    imp = 0
+    for k1 in lab_counts:
+        p1 = float(lab_counts[k1])/total
+        for k2 in lab_counts:
+            if k1 == k2: continue
+            p2 = float(lab_counts[k2])/total
+            imp+=p1*p2
+    return imp
 
 
 if __name__ == '__main__':
@@ -47,6 +63,14 @@ if __name__ == '__main__':
     print([item[4] for item in set2])
     
     # 统计这一分割下标签的划分情况
-    print(unique_counts(set1))
-    print(unique_counts(set2))
+    set3 = unique_counts(set1)
+    set4 = unique_counts(set2)
+    print(set3)
+    print(set4)
+    
+    # 计算每个分类的基尼不纯度
+    g1 = gini_impurity(set3)
+    g2 = gini_impurity(set4)
+    print(g1)
+    print(g2)
     
