@@ -47,47 +47,64 @@ def calcuEntrop(dataSet):
     probability = [float(v)/sum(labelCounts.values()) for v in labelCounts.values()]
     return -1*reduce(operator.add, map(lambda x:x*math.log(x,2), probability ))
 
-
-# 创建决策树(书中原码)
-# 二分法，每个结点分出两个子树
-# input：数据集rows，分值函数
-# output: 结点对象
-def buildtree(rows,scoref=calcuEntrop):
-    # 如果数据为空，返回一个空结点
-    if len(rows)==0: return decisionnode( )
+# 计算信息增益
+# input: 样本集, 划分后样本集
+# output: 信息增益
+def calcuGain(dataSet, subset):
     
-    current_score=scoref(rows)
-    # 设置变量追踪最佳划分
-    best_gain=0.0
-    best_criteria=None
-    best_sets=None
-    column_count=len(rows[0])-1 # 列数，最后一列是标签不考虑
-    # 遍历各列
-    for col in range(0,column_count):
-        # Generate the list of different values in
-        # this column
-        column_values={} # 计数字典
-        # 遍历各行
-        for row in rows:
-            column_values[row[col]]=1 # 取值计数
-        # 使用本列各取值尝试划分数据
-        for value in column_values.keys( ):
-            (set1,set2)=divideset(rows,col,value)
-            # 计算信息增益
-            p=float(len(set1))/len(rows)
-            gain=current_score-p*scoref(set1)-(1-p)*scoref(set2)
-            if gain>best_gain and len(set1)>0 and len(set2)>0:
-                best_gain=gain
-                best_criteria=(col,value)
-                best_sets=(set1,set2)
-    # Create the subbranches
-    if best_gain>0:
-        trueBranch=buildtree(best_sets[0])
-        falseBranch=buildtree(best_sets[1])
-        return decisionnode(col=best_criteria[0],value=best_criteria[1],tb=trueBranch,fb=falseBranch)
-    else:
-        return decisionnode(results=uniquecounts(rows))
-                    
+
+
+# 创建决策树
+# input: 训练集(二维列表，其中最后一列为标签), 属性集(一维列表，元素为列号)
+# output: dicisionNode 的一个实例
+def buildDicisionTree(trainSet, attrSet):
+    node = decisionNode(-1, None, None, None, None)
+    
+    # 如果当前训练集熵为0，表明只有一种结果标签，则无需再分类，立即返回作为叶结点
+    entropy = calcuEntrop(trainSet)
+    if entropy = 0:
+        return node.label = trainSet[0][-1]
+    
+    # 对各属性进行不同值的计数，每属性一个字典，各属性组成字典列表
+    counterDictList = [Counter(entry[colNum] for entry in trainSet) for colNum in range(0, len(attrSet))]
+    # 对取字典中的计数最小值生成计数最小值列表,
+    minCounterList = [ min(counterDict.values()) for counterDict in counterDictList]
+    
+    # 如果已没有未参与分类的属性 或 属性取值全部相同(没有分辨力)，则生成叶结点对象返回
+    if len(attrSet) == 0 or min(minCounterList) == len(trainSet):
+        # 对标签不同值计数
+        labelCountsDict = Counter(entry[-1] for entry in trainSet)
+        # 取计数值最大的标签 用作中结点标签
+        label = max(labelCountsDict, key=lambda x:labelCountsDict[x])        
+        node.label = label # 叶结点仅有 label 值
+        return node    
+    
+    
+    # 否则，遍历当前属性集，寻找最优划分属性
+    gainList = list()
+    for colNum in range(0, len(attrSet)):
+        # 如果当前属性有不同的取值
+        if minCounterList[colNum]<len(attrSet):
+            gainList[colNum] = 
+            # 生成当前训练子集中属性colNum的值列表
+            colValue = [row[colNum] for row in trainSet]
+        # 遍历此列所有列值
+        for value in colValue:
+            # 按此列值拆分数据集
+            (subSet1, subSet2) = divideSet(trainSet, colNum, value)
+            set1Entropy = calcuEntrop(subSet1)
+            set2Entropy = calcuEntrop(subSet2)
+            if set1Entropy = 0
+                decisionNode(colNum, colValue, subSet1[0][-1], None, None)
+            else:
+                
+            calcuEntrop(subSet2)
+            if :
+                return 
+            
+                
+
+
 if __name__ == '__main__':
     
     # 从有分割符的文件数据中生成数据字典
