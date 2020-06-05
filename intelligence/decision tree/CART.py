@@ -64,13 +64,16 @@ def calcuGain(dataSet, subSetTuple):
 # input: 训练集(二维列表，其中最后一列为标签), 属性集(一维列表，元素为列号)
 # output: dicisionNode 的一个实例
 def buildDicisionTree(trainSet, attrSet):
+    print("--------------------------------------------")
+    print(trainSet)
     node = decisionNode(-1, None, None, None, None)
     
     # 如果当前训练集熵为0，表明只有一种结果标签，则无需再分类，立即返回作为叶结点
     entropy = calcuEntropy(trainSet)
     if entropy == 0:
         node.label = trainSet[0][-1]
-        print("entropy is 0, return")
+        print("classificationis done, class is : ",end="")
+        print(node.label)
         return node
     
     # 对数据集中各属性进行不同取值的计数，每属性一个字典，各属性组成字典列表
