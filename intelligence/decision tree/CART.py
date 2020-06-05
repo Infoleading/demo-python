@@ -2,10 +2,13 @@ from collections import Counter
 from functools import reduce
 import operator
 import math
+import copy
+
+attrName = ['site', 'nation', 'FAQ', 'pages']
 
 # 结点数据结构
 class decisionNode:
-    def __init__(slef, colNum=-1, conditionValue=None, label=None, tb=None, fb=None):
+    def __init__(self, colNum=-1, conditionValue=None, label=None, tb=None, fb=None):
         self.colNum = colNum # 属性列值
         self.conditionValue = conditionValue # 判定条件值（一般是判定为True的值）
         self.label = label # 标签值，除叶结点外，其它结点都为None值
@@ -27,6 +30,8 @@ def divideSet(dataSet, column, value):
     
     set1 = [row for row in dataSet if split_function(row)]
     set2 = [row for row in dataSet if not split_function(row)]
+    #print(len(set1))
+    #print(len(set2))
     return (set1, set2)
 
 
@@ -42,16 +47,17 @@ def calcuGini(dataSet):
 # 计算信息熵
 # input: 样本集(二维列表，其中最后一列为标签)
 # output: 该样本集的信息熵(float)
-def calcuEntrop(dataSet):
+def calcuEntropy(dataSet):
     labelCounts = Counter(entry[-1] for entry in dataSet)
+    #print(labelCounts)
     probability = [float(v)/sum(labelCounts.values()) for v in labelCounts.values()]
     return -1*reduce(operator.add, map(lambda x:x*math.log(x,2), probability ))
 
 # 计算信息增益
 # input: 样本集, 划分后样本集
 # output: 信息增益
-def calcuGain(dataSet, subset):
-    
+def calcuGain(dataSet, subSetTuple):
+    return calcuEntropy(dataSet)-sum([len(subSet)/len(dataSet)*calcuEntropy(subSet) for subSet in subSetTuple])
 
 
 # 创建决策树
@@ -61,15 +67,16 @@ def buildDicisionTree(trainSet, attrSet):
     node = decisionNode(-1, None, None, None, None)
     
     # 如果当前训练集熵为0，表明只有一种结果标签，则无需再分类，立即返回作为叶结点
-    entropy = calcuEntrop(trainSet)
-    if entropy = 0:
-        return node.label = trainSet[0][-1]
+    entropy = calcuEntropy(trainSet)
+    if entropy == 0:
+        node.label = trainSet[0][-1]
+        print("entropy is 0, return")
+        return node
     
-    # 对各属性进行不同值的计数，每属性一个字典，各属性组成字典列表
+    # 对数据集中各属性进行不同取值的计数，每属性一个字典，各属性组成字典列表
     counterDictList = [Counter(entry[colNum] for entry in trainSet) for colNum in range(0, len(attrSet))]
-    # 对取字典中的计数最小值生成计数最小值列表,
-    minCounterList = [ min(counterDict.values()) for counterDict in counterDictList]
-    
+    # 对字典中的计数取最小值生成计数最小值列表,
+    minCounterList = [ min(counterDict.values()) for counterDict in counterDictList]   
     # 如果已没有未参与分类的属性 或 属性取值全部相同(没有分辨力)，则生成叶结点对象返回
     if len(attrSet) == 0 or min(minCounterList) == len(trainSet):
         # 对标签不同值计数
@@ -77,32 +84,47 @@ def buildDicisionTree(trainSet, attrSet):
         # 取计数值最大的标签 用作中结点标签
         label = max(labelCountsDict, key=lambda x:labelCountsDict[x])        
         node.label = label # 叶结点仅有 label 值
+        print("no attribute to use")
         return node    
-    
-    
-    # 否则，遍历当前属性集，寻找最优划分属性
-    gainList = list()
+        
+    # 否则，遍历当前属性集，寻找最优划分属性的最优划分值
+    bestGain = 0
+    bestAttr = 0
+    bestValue = 0
     for colNum in range(0, len(attrSet)):
-        # 如果当前属性有不同的取值
-        if minCounterList[colNum]<len(attrSet):
-            gainList[colNum] = 
-            # 生成当前训练子集中属性colNum的值列表
-            colValue = [row[colNum] for row in trainSet]
-        # 遍历此列所有列值
+        # 获取 colNum 属性的全部值，并去重复
+        colValue = list(set([row[attrSet[colNum]] for row in trainSet]))
+        # 遍历此列所有值，用每个取值试拆分数据集，并计算拆分后的信息增益
         for value in colValue:
-            # 按此列值拆分数据集
-            (subSet1, subSet2) = divideSet(trainSet, colNum, value)
-            set1Entropy = calcuEntrop(subSet1)
-            set2Entropy = calcuEntrop(subSet2)
-            if set1Entropy = 0
-                decisionNode(colNum, colValue, subSet1[0][-1], None, None)
-            else:
-                
-            calcuEntrop(subSet2)
-            if :
-                return 
-            
-                
+            #print(attrSet[colNum])
+            #print(value)
+            # 试拆分数据
+            setTuple = divideSet(trainSet,attrSet[colNum],value)
+            # 只有在划分出的两个子集都有数据的情况下才计算信息增益
+            if len(setTuple[0])>0 and len(setTuple[1])>0:
+                gain = calcuGain(trainSet, setTuple)
+            if gain>bestGain:
+                bestAttr = attrSet[colNum]
+                bestValue = value
+                bestGain = gain
+    # 拆分数据集            
+    subSetTuple = divideSet(trainSet, bestAttr, bestValue)
+    # 记录本次拆分属性、值
+    node.colNum = bestAttr
+    node.conditionValue = bestValue
+    # 打印结点信息
+    print("if ",end="")
+    print(attrName[bestAttr],end="")
+    print(" is(or grate) ",end="")
+    print(bestValue)
+    # 递归生成本结点左右子树
+    attrSet.remove(bestAttr) # 移除已经考虑过的属性
+    print("the least attribute is: ",end="")
+    print(attrSet)
+    node.tb = buildDicisionTree(subSetTuple[0], copy.deepcopy(attrSet))
+    node.fb = buildDicisionTree(subSetTuple[1], copy.deepcopy(attrSet))
+    return node
+               
 
 
 if __name__ == '__main__':
@@ -125,10 +147,12 @@ if __name__ == '__main__':
     print(g4)
     
     # 计算 信息熵
-    entropy1 = calcuEntrop(set1)
-    entropy2 = calcuEntrop(set2)
+    entropy1 = calcuEntropy(set1)
+    entropy2 = calcuEntropy(set2)
     print("Entropy:")
     print(entropy1)
     print(entropy2)
     
+    # 创建决策树
+    buildDicisionTree(data, list(range(0,len(data[0])-1)))
     

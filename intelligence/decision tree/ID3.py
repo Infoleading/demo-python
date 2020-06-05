@@ -42,13 +42,16 @@ def calcuGini(dataSet):
 # 计算信息熵
 # input: 样本集(二维列表，其中最后一列为标签)
 # output: 该样本集的信息熵(float)
-def calcuEntrop(dataSet):
+def calcuEntropy(dataSet):
     labelCounts = Counter(entry[-1] for entry in dataSet)
     probability = [float(v)/sum(labelCounts.values()) for v in labelCounts.values()]
     return -1*reduce(operator.add, map(lambda x:x*math.log(x,2), probability ))
 
 # 计算信息增益
-# input: 样本集, 划分后样本集
+# input: 样本集, 划分后样本集列表
+# output: 信息增益
+def calcuGain(dataSet, subSetTuple):
+    return calcuEntropy(dataSet)-sum([len(subSet)/len(dataSet)*calcuEntropy(subSet) for subSet in subSetTuple])
 
 
 # 创建决策树
@@ -58,9 +61,10 @@ def buildDicisionTree(trainSet, attrSet):
     node = decisionNode(-1, None, None, None, None)
     
     # 如果当前训练集熵为0，表明只有一种结果标签，则无需再分类，立即返回作为叶结点
-    entropy = calcuEntrop(trainSet)
-    if entropy = 0:
-        return node.label = trainSet[0][-1]
+    entropy = calcuEntropy(trainSet)
+    if entropy == 0:
+        node.label = trainSet[0][-1]
+        return node
     
     # 对各属性进行不同值的计数，每属性一个字典，各属性组成字典列表
     counterDictList = [Counter(entry[colNum] for entry in trainSet) for colNum in range(0, len(attrSet))]
@@ -89,13 +93,13 @@ def buildDicisionTree(trainSet, attrSet):
         for value in colValue:
             # 按此列值拆分数据集
             (subSet1, subSet2) = divideSet(trainSet, colNum, value)
-            set1Entropy = calcuEntrop(subSet1)
-            set2Entropy = calcuEntrop(subSet2)
+            set1Entropy = calcuEntropy(subSet1)
+            set2Entropy = calcuEntropy(subSet2)
             if set1Entropy = 0
                 decisionNode(colNum, colValue, subSet1[0][-1], None, None)
             else:
                 
-            calcuEntrop(subSet2)
+            calcuEntropy(subSet2)
             if :
                 return 
             
@@ -122,8 +126,8 @@ if __name__ == '__main__':
     print(g4)
     
     # 计算 信息熵
-    entropy1 = calcuEntrop(set1)
-    entropy2 = calcuEntrop(set2)
+    entropy1 = calcuEntropy(set1)
+    entropy2 = calcuEntropy(set2)
     print("Entropy:")
     print(entropy1)
     print(entropy2)
