@@ -27,7 +27,7 @@ def divideSet(dataSet, column, value):
     else:
         # 处理非数值型数据
         split_function = lambda row:row[column]==value
-    
+    # 本方法仅将数据集划分为两类
     set1 = [row for row in dataSet if split_function(row)]
     set2 = [row for row in dataSet if not split_function(row)]
     #print(len(set1))
