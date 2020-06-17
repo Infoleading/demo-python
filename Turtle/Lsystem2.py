@@ -1,5 +1,6 @@
 from turtle import *
 
+
 def draw_path(path, length, angle):
     for symbol in path:
         if symbol == 'F':
@@ -9,6 +10,8 @@ def draw_path(path, length, angle):
         elif symbol == '+':
             right(angle)
             
+def splite
+
 def apply_rule(rule, path):
     return path.replace('F', rule)
 
@@ -26,14 +29,12 @@ if __name__ == "__main__":
         'F++F++F',
         'F-F-F-F'
         ]
-    rule = [
-        'F-F+F+FF-F-F+F',
-        'F-F++F-F',
-        'F-F++F-F',
-        'F-FF--F+F'
-        ]
-    t=2  # 测试案例
-    power = 3 # 应用规则次数 [0,~]
+    rule = {
+        Fl:'Fl+Fr',
+        Fr:'-Fl-Fr',
+        }
+    t=3  # 测试案例
+    power = 6 # 应用规则次数 [0,~]
     for i in range(power):
         path[t] = apply_rule(rule[t],path[t])
         
