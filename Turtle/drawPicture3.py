@@ -1,9 +1,15 @@
+'''
+        Fl
+        'Fl':'Fl+Fr++Fr-Fl--FlFl-Fr+',
+        'Fr':'-Fl+FrFr++Fr+Fl--Fl-Fr'
+        -L
+        'L':'LF+RFR+FL-F-LFLFL-FRFR+',
+        'R':'-LFLF+RFRFR+F+RF-LFL-FR'
+        -L
+        'L':'+RF-LFL-FR+',
+        'R':'-LF+RFR+FL-'
+'''
 from turtle import *
-
-# 符号表
-# 定义公式所用符号
-symbolList = [['F','B','f','b', '+', '-'],
-              ['Fr','Fl']]
 
 # 色彩空间转换
 def HSB2RGB(h, s, v):
@@ -71,40 +77,48 @@ def apply_rule(rule, path):
             pathList[i] = rule[symbol]
     return "".join(symbol for symbol in pathList)
 
+# 符号表
+# 定义公式所用符号
+symbolList = [['F','B','f','b', '+', '-','L','R'],
+              ['F1','F2']]
 
 if __name__ == "__main__":
     # setup Screen and window
     setup(width=.99, height=.90, startx=0, starty=0)
-    screensize(10000, 6000)
+    screensize(10000, 10000)
     tracer(False)
     hideturtle()
     bgcolor('#000000')
     speed(0)
-    # setup parameter
-    origin = (0,0)
-    head = 90
     
-    length = 60
-    angle = 30
-    path = 'F'
+    # setup parameter
+    length = 80
+    angle = 90
+    path = '-L'
     rule = {
-        'F':'F+F-F-FFF+F-F'
+        'L':'+RF-LFL-FR+',
+        'R':'-LF+RFR+FL-'
         }
     # 生成绘图路径
-    n = 5 # 应用规则次数 [0,~]
+    n = 8 # 应用规则次数 [0,~]
     for i in range(n):
         path = apply_rule(rule,path)
     print(path)
+    
     # 开始绘图
-    level=10
-    HSB=(100, 1.0, 1.0)
-    wid=1
+    level=4 # 线条层次 level-1
+    HSB=(60, 1, 1) # 色相，饱和度，明度
+    wid=3  # 线宽
+    shadow=1.3 # 阴影宽率
+    contrast=1.4 # 色彩对比度
+    origin = (0,0) # 原点位置
+    head = 90 # 朝向
     up()
     goto(origin)
     seth(head)
     for i in range(1,level):
-        width(wid*(1.5**level)/(2**i))
-        color(HSB2RGB(HSB[0], HSB[1], HSB[2]*(i/level)))
+        width(wid*((level-1)**shadow)/(i**shadow))
+        color(HSB2RGB(HSB[0], HSB[1], HSB[2]*(i/(level-1))**contrast))
         draw_path(path, length/(n*2), angle)
         up()
         goto(origin)
