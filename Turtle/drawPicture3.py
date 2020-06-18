@@ -3,7 +3,30 @@ from turtle import *
 # 符号表
 # 定义公式所用符号
 symbolList = [['F','B','f','b', '+', '-'],
-              ['Fr','Br']]
+              ['Fr','Fl']]
+
+# 色彩空间转换
+def HSB2RGB(h, s, v):
+    h1 = h%360
+    hi = int((h1)/60)%6
+    f = h1/60- hi
+    p = v*(1-s)
+    q = v*(1-f*s)
+    t = v*(1-(1-f)*s)
+    RGB = [0.0, 0.0, 0.0]
+    if hi==0:
+        RGB = [v, t, p]
+    elif hi==1:
+        RGB = [q, v, p]
+    elif hi==2:
+        RGB = [p, v, t]
+    elif hi==3:
+        RGB = [p, q, v]
+    elif hi==4:
+        RGB = [t, p, v]
+    elif hi==5:
+        RGB = [v, p, q]
+    return (RGB[0], RGB[1], RGB[2])
 
 # 拆分路径为符号列表
 def split(path):
@@ -38,7 +61,6 @@ def draw_path(path, length, angle):
             up()
             bk(length)
             
-
 # 应用规则
 # 用规则替换路径中的符号
 def apply_rule(rule, path):
@@ -49,27 +71,6 @@ def apply_rule(rule, path):
             pathList[i] = rule[symbol]
     return "".join(symbol for symbol in pathList)
 
-def HSB2RGB(h, s, v):
-    h1 = h%360
-    hi = int((h1)/60)%6
-    f = h1/60- hi
-    p = v*(1-s)
-    q = v*(1-f*s)
-    t = v*(1-(1-f)*s)
-    RGB = [0.0, 0.0, 0.0]
-    if hi==0:
-        RGB = [v, t, p]
-    elif hi==1:
-        RGB = [q, v, p]
-    elif hi==2:
-        RGB = [p, v, t]
-    elif hi==3:
-        RGB = [p, q, v]
-    elif hi==4:
-        RGB = [t, p, v]
-    elif hi==5:
-        RGB = [v, p, q]
-    return (RGB[0], RGB[1], RGB[2])
 
 if __name__ == "__main__":
     # setup Screen and window
@@ -83,19 +84,18 @@ if __name__ == "__main__":
     origin = (0,0)
     head = 90
     
-    length = 100
+    length = 60
     angle = 30
     path = 'F'
     rule = {
-        'F':'FFbb+Fb--Fb'        
+        'F':'F+F-F-FFF+F-F'
         }
     # 生成绘图路径
-    n = 2 # 应用规则次数 [0,~]
+    n = 5 # 应用规则次数 [0,~]
     for i in range(n):
         path = apply_rule(rule,path)
     print(path)
     # 开始绘图
-    color('gold','darkgoldenrod')
     level=10
     HSB=(100, 1.0, 1.0)
     wid=1

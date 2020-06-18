@@ -62,7 +62,7 @@ def HSB2RGB(h, s, v):
 # 符号表
 # 定义公式所用符号
 symbolList = [['F','f', '+', '-'],
-              ['Fr', 'Fb','Fl']]
+              ['Fl', 'Fr']]
 
 if __name__ == "__main__":
     # setup Screen and window
@@ -74,28 +74,27 @@ if __name__ == "__main__":
     speed(0)
     # setup parameter
     length = 100
-    angle = 30
-    path = 'F'
+    angle = 60
+    path = 'Fl'
     rule = {
-        'F':'F+Fr-Fb+Fl',
-        'Fr':'F+Fr-Fb',
-        'Fb':'F-Fb+Fl'
+        'Fl':'Fl+Fr++Fr-Fl--FlFl-Fr+',
+        'Fr':'-Fl+FrFr++Fr+Fl--Fl-Fr',
         }
     # generate path
-    n = 10 # 应用规则次数 [0,~]
+    n = 4 # 应用规则次数 [0,~]
     for i in range(n):
         path = apply_rule(rule,path)
     print(path)
     # 开始绘图
     color('gold','darkgoldenrod')
     level=10
-    HSB=(50, 1.0, 1.0)
+    HSB=(1, 1.0, 1.0)
     wid=1
     up()
     goto(-300,0)
     seth(0)
     for i in range(1,level):
-        width(wid*(1.5**level)/(2**i))
+        width(wid*(1.55**level)/(2**i))
         color(HSB2RGB(HSB[0], HSB[1], HSB[2]*(i/level)))
         draw_path(path, length/(n*2), angle)
         up()
