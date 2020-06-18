@@ -72,4 +72,3 @@ if __name__ == "__main__":
         head+=1
         hue+=1
         sleep(0.001)
-    exitonclick()
