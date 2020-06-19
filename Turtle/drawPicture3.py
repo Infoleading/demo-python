@@ -1,4 +1,9 @@
 '''
+边复写和结点复写的 L 系统
+用于规则几何图形建模
+
+        'F1':'F2+F1+F2',
+        'F2':'F1-F2-F1'
         Fl
         'Fl':'Fl+Fr++Fr-Fl--FlFl-Fr+',
         'Fr':'-Fl+FrFr++Fr+Fl--Fl-Fr'
@@ -92,27 +97,26 @@ if __name__ == "__main__":
     speed(0)
     
     # setup parameter
-    length = 80
-    angle = 90
-    path = '-L'
+    length = 60
+    angle = 60
+    path = 'F++F++F'
     rule = {
-        'L':'+RF-LFL-FR+',
-        'R':'-LF+RFR+FL-'
+        'F':'F-F++F-F'
         }
     # 生成绘图路径
-    n = 8 # 应用规则次数 [0,~]
+    n = 4 # 应用规则次数 [0,~]
     for i in range(n):
         path = apply_rule(rule,path)
     print(path)
     
     # 开始绘图
-    level=4 # 线条层次 level-1
+    level=10 # 线条层次 level-1
     HSB=(60, 1, 1) # 色相，饱和度，明度
     wid=3  # 线宽
     shadow=1.3 # 阴影宽率
     contrast=1.4 # 色彩对比度
     origin = (0,0) # 原点位置
-    head = 90 # 朝向
+    head = 60 # 朝向
     up()
     goto(origin)
     seth(head)
