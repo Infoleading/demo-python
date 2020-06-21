@@ -13,6 +13,9 @@
         -L
         'L':'+RF-LFL-FR+',
         'R':'-LF+RFR+FL-'
+        
+        'F++F++F++F++F'
+        'F':'--F++++F--'
 '''
 from turtle import *
 

@@ -16,6 +16,14 @@
 'X':'F-[[X]+X]+F[+FX]-X'
 'F':'FF'
 
+VZFFF
+
+        'V':'[+++W][---W]YV',
+        'W':'+X[-W]Z',
+        'X':'-W[+X]Z',
+        'Y':'YZ',
+        'Z':'[-FFF][+FFF]F'
+
 '''
 from turtle import *
 from rainbow import *
@@ -23,8 +31,10 @@ from rainbow import *
 # 符号表
 # 定义公式所用符号
 # 二维表格，从单字符到多字符
-symbol_list = [['F','f', '+', '-','[',']','X'],
-              ['Fl', 'Fr']]
+symbol_list = [
+    ['F','f','+','-','|','[',']','#','!','@','{','}','>','<','&','(',')',  'V','W','X','Y','Z'],
+    ['Fl', 'Fr']
+    ]
 
 # 结点栈
 # 用一个List来模拟stack, 仅使用其 append pop 方法取数
@@ -76,7 +86,6 @@ def apply_rule(rule, path):
             pathList[i] = rule[symbol]
     return "".join(symbol for symbol in pathList)
 
-
 if __name__ == "__main__":
     
     # 设置屏幕
@@ -88,24 +97,27 @@ if __name__ == "__main__":
     speed(0)
     
     # 设置模型规则
-    length = 40
-    angle = 22.5
-    path = 'X'
+    length = 300
+    angle = 20
+    path = 'VZFFF'
     rule = {
-        'X':'F-[[X]+X]+F[+FX]-X',
-        'F':'FF'
+        'V':'[+++W][---W]YV',
+        'W':'+X[-W]Z',
+        'X':'-W[+X]Z',
+        'Y':'YZ',
+        'Z':'[-FFF][+FFF]F'
         }
     
     # 生成路径
-    n = 6 # 应用规则次数 [0,~]
+    n = 10 # 应用规则次数 [0,~]
     for i in range(n):
         path = apply_rule(rule,path)
     print(path)
         
     # 开始绘图
-    level=4 # 线条层次 level-1
+    level=3 # 线条层次 level-1
     HSB=(120, 1, 1) # 色相，饱和度，明度
-    wid=3  # 线宽
+    wid=2  # 线宽
     shadow=1.3 # 阴影宽率
     contrast=1.4 # 色彩对比度
     origin = (0,-300) # 原点位置
