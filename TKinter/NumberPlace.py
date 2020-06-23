@@ -58,7 +58,8 @@ class NumberPlace():
                 while len(candidate_list)>0:
                     matrix[i][j] = candidate_list.pop()
                     print(matrix)
-                    self.backtracking(pos+1)
+                    if self.backtracking(pos+1):
+                        return True;
                 return False
             else:
                 self.backtracking(pos+1)
