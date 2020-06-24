@@ -13,21 +13,25 @@ class NumberPlace():
     def __init__(self):
         global matrix
         matrix = [['' for col in range(9)] for row in range(9)]
-        self.fill_unit(0, 0, self.get_random_list())
-        self.fill_unit(3, 3, self.get_random_list())
-        self.fill_unit(6, 6, self.get_random_list())
         self.candidates = [['' for col in range(9)] for row in range(9)]
         
+    # 生成1-9随机数列表    
+    def get_random_list(self):
+        num_list = list(range(1,10))
+        random.shuffle(num_list)
+        return num_list
     
     # 随机数装填宫
-    def fill_unit(self, indexRow, indexCol, randomList):
-        for i in range(indexRow, indexRow+3):
-            for j in range(indexCol, indexCol+3):
+    def random_fill_unit(self, unitNum, randomList):
+        x_LT = 3*int((unitNum-1)/3) # 获得本宫左上角x坐标
+        y_LT = (unitNum-1-x_LT)*3 # 获得本宫左上角y坐标
+        x_RB = x_LT+2 # 获得本宫右下角x坐标
+        y_RB = y_LT+2 # 获得本宫右下角y从标
+        for i in range(x_LT, x_RB+1):
+            for j in range(y_LT, y_RB+1):
                 matrix[i][j] = randomList.pop()
     
     # 获得1-9宫数集
-    # 返回指定宫的数集列表
-    # 参数：unitNum 宫的编号，从左往右，从上至下分别是 1-9
     def get_unit(self, unitNum):
         x_LT = 3*int((unitNum-1)/3) # 获得本宫左上角x坐标
         y_LT = (unitNum-1-x_LT)*3 # 获得本宫左上角y坐标
@@ -77,19 +81,27 @@ class NumberPlace():
     
     # 重置数独矩阵
     # 按生成一个新的数独矩阵
-    def reset(self, i):
-        self.clean()
-        self.fill_unit(0, 0, self.get_random_list())
-        self.fill_unit(3, 3, self.get_random_list())
-        self.fill_unit(6, 6, self.get_random_list())
-        return self.backtracking(1)
+    def reset(self, difficult):
+        self.backtracking(1)
+        for i in range(9):
+            for j in range(9):
+                if random.randint(0,10) < difficult:
+                    matrix[i][j]=''
         
+    # 生成对角矩阵
+    def makeCube():
+        self.clean()
+        self.random_fill_unit(1, self.get_random_list())
+        self.random_fill_unit(5, self.get_random_list())
+        self.random_fill_unit(9, self.get_random_list())
+        return True#self.backtracking(1)
     
     # 生成候选集
     # 根据已知条件寻找i 行 j 列格子的候选数集
     def find_candidate_list(self, i, j):
         # 本行元素+本列元素+本宫元素
-        exist_list = matrix[i] + [X[j] for X in matrix] + self.get_current_unit(i, j)
+        exist_list = list(set(matrix[i] + [X[j] for X in matrix] + self.get_current_unit(i, j)))
+        #print("exist_list: ", exist_list)
         return [k for k in range(1, 10) if k not in exist_list]
     
     # 验证单个元素是否合法
@@ -113,8 +125,9 @@ class NumberPlace():
             if matrix[i][j] == '':
                 candidate_list = self.find_candidate_list(i, j)
                 #print("candidate:",candidate_list)
-                while len(candidate_list)>0:               
-                    matrix[i][j] = candidate_list.pop(random.randint(0,len(candidate_list)-1)) # 从候选集中随机抽取
+                while len(candidate_list)>0:
+                    #matrix[i][j] = candidate_list.pop() # 固定求解，每次解出的答案均相同
+                    matrix[i][j] = candidate_list.pop(random.randint(0,len(candidate_list)-1)) # 不定求解，从候选集中随机抽取
                     #print("candidate:",candidate_list)
                     #print(matrix)
                     #input()
@@ -124,7 +137,7 @@ class NumberPlace():
                     matrix[i][j] = '' # 如果下层没有成功，则清除本次试值
                 #print("<<<< False")
                 return False
-            else: # 跳过该位置元素
+            else:
                 pos+=1
         # end while
         #print("<<<< End")
@@ -175,11 +188,11 @@ class Application(tk.Frame):
         # 难度单选框
         rb_diff_0 = tk.Radiobutton(lF_difficulty, text="入门", variable=self.iv_dif, value=1, font=widget_font)
         rb_diff_0.pack()
-        rb_diff_1 = tk.Radiobutton(lF_difficulty, text="容易", variable=self.iv_dif, value=2, font=widget_font)
+        rb_diff_1 = tk.Radiobutton(lF_difficulty, text="容易", variable=self.iv_dif, value=3, font=widget_font)
         rb_diff_1.pack()
-        rb_diff_2 = tk.Radiobutton(lF_difficulty, text="进阶", variable=self.iv_dif, value=3, font=widget_font)
+        rb_diff_2 = tk.Radiobutton(lF_difficulty, text="进阶", variable=self.iv_dif, value=5, font=widget_font)
         rb_diff_2.pack()
-        rb_diff_3 = tk.Radiobutton(lF_difficulty, text="大师", variable=self.iv_dif, value=4, font=widget_font)
+        rb_diff_3 = tk.Radiobutton(lF_difficulty, text="大师", variable=self.iv_dif, value=8, font=widget_font)
         rb_diff_3.pack()   
         # 生成按钮
         btn_begin = tk.Button(lF_difficulty, text="     生成题目     ", font=widget_font, command=self.cmd_generate)
@@ -229,7 +242,9 @@ class Application(tk.Frame):
      
     # 事件响应函数：生成题目
     def cmd_generate(self):
-        self.np.reset(1)
+        self.np.reset(self.iv_dif.get())
+        #global matrix
+        #matrix = [['', 1, '', '', '', 8, 4, '', 7], [9, 5, '', '', '', '', '', '', ''], ['', '', 8, '', 1, '', '', '', ''], ['', 8, 2, '', '', '', '', '', ''], [7, '', '', 4, '', 6, '', '', 8], ['', '', '', '', '', '', 6, 2, ''], ['', '', '', '', 5, '', 7, '', ''], ['', '', '', '', '', '', '', 8, 2], [5, '', 3, 2, '', '', '', 1, '']]
         self.updateEntries()
 
     # 事件响应函数：退出程序
@@ -260,7 +275,8 @@ class Application(tk.Frame):
     def updateMatrix(self):
         for i in range(9):
             for j in range(9):
-                matrix[i][j] = self.entries[i][j].get()
+                if self.entries[i][j].get() != '':
+                    matrix[i][j] = int(self.entries[i][j].get())
 
     # 从矩阵更新数据到Entries
     def updateEntries(self):

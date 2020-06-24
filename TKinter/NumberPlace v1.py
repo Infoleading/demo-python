@@ -1,11 +1,13 @@
 import tkinter as tk
+import tkinter.messagebox
 import math
 import random
+import time
+import collections
 
 num_font = ('Arial', 40)
 title_font = ('黑体', 40)
 widget_font = ('宋体', 20)
-PINK = (4,2,2)
 
 # ========================数独类===========================
 class NumberPlace():
@@ -13,10 +15,6 @@ class NumberPlace():
     def __init__(self):
         global matrix
         matrix = [['' for col in range(9)] for row in range(9)]
-        self.fill_unit(0, 0, self.get_random_list())
-        self.fill_unit(3, 3, self.get_random_list())
-        self.fill_unit(6, 6, self.get_random_list())
-        self.candidates = [['' for col in range(9)] for row in range(9)]
         
     # 生成1-9随机数列表    
     def get_random_list(self):
@@ -25,51 +23,50 @@ class NumberPlace():
         return num_list
     
     # 随机数装填宫
-    def fill_unit(self, indexRow, indexCol, randomList):
-        for i in range(indexRow, indexRow+3):
-            for j in range(indexCol, indexCol+3):
+    def random_fill_unit(self, unitNum, randomList):
+        x_LT = 3*int((unitNum-1)/3) 
+        y_LT = (unitNum-1-x_LT)*3 
+        x_RB = x_LT+2 
+        y_RB = y_LT+2 
+        for i in range(x_LT, x_RB+1):
+            for j in range(y_LT, y_RB+1):
                 matrix[i][j] = randomList.pop()
     
     # 获得1-9宫数集
     def get_unit(self, unitNum):
-        x_LT = 3*int((unitNum-1)/3) # 获得本宫左上角x坐标
-        y_LT = (unitNum-1-x_LT)*3 # 获得本宫左上角y坐标
-        x_RB = x_LT+2 # 获得本宫右下角x坐标
-        y_RB = y_LT+2 # 获得本宫右下角y从标
-        #print("unit: ", unitNum)
-        #print("LTx, LTy, RBx, RBy", x_LT, y_LT, x_RB, y_RB)
+        x_LT = 3*int((unitNum-1)/3) 
+        y_LT = (unitNum-1-x_LT)*3 
+        x_RB = x_LT+2 
+        y_RB = y_LT+2 
         unitList = []
         for i in range(x_LT, x_RB+1):
             for j in range(y_LT, y_RB+1):
                 if matrix[i][j]!='':
                     unitList.append(matrix[i][j])
-        #print('current unit: ',unitList)
         return unitList
     
     # 获取当前坐标所在宫数集
-    # currentRow 当前位置 x 坐标
-    # currentCol 当前位置 y 坐标
     def get_current_unit(self, currentRow, currentCol):
         if currentRow<3 :
-            if currentCol<3: # 第1宫
+            if currentCol<3:
                 return self.get_unit(1)                        
-            elif currentCol<6: # 第2宫
+            elif currentCol<6:
                 return self.get_unit(2)
-            else: # 第3宫
+            else:
                 return self.get_unit(3)
         elif currentRow<6 :
-            if currentCol<3: # 第4宫
+            if currentCol<3:
                 return self.get_unit(4)
-            elif currentCol<6: # 第5宫
+            elif currentCol<6:
                 return self.get_unit(5)
-            else: # 第6宫
+            else:
                 return self.get_unit(6)
         elif currentRow<9 :
-            if currentCol<3: # 第7宫
+            if currentCol<3:
                 return self.get_unit(7)
-            elif currentCol<6: # 第8宫
+            elif currentCol<6:
                 return self.get_unit(8)
-            else: # 第9宫            
+            else:         
                 return self.get_unit(9)
                 
     # 清空矩阵      
@@ -79,27 +76,32 @@ class NumberPlace():
                 matrix[i][j] = ''
     
     # 重置数独矩阵
-    # 按生成一个新的数独矩阵
-    def reset(self, i):
-        self.clean()
-        self.fill_unit(0, 0, self.get_random_list())
-        self.fill_unit(3, 3, self.get_random_list())
-        self.fill_unit(6, 6, self.get_random_list())
-        return self.backtracking(1)
-        
+    def reset(self, difficult):
+        self.backtracking(1)
+        for i in range(9):
+            for j in range(9):
+                if random.randint(0,10) < difficult:
+                    matrix[i][j]=''
     
     # 生成候选集
-    # 根据已知条件寻找i 行 j 列格子的候选数集
     def find_candidate_list(self, i, j):
-        # 本行元素+本列元素+本宫元素
-        exist_list = matrix[i] + [X[j] for X in matrix] + self.get_current_unit(i, j)
-        #print("exist_list: ", exist_list)
+        exist_list = list(set(matrix[i] + [X[j] for X in matrix] + self.get_current_unit(i, j)))
         return [k for k in range(1, 10) if k not in exist_list]
     
-    # 验证单个元素是否合法
-    # 检验 i,j 处num值的合法性
+    # 验证单个元素num 是否可放 i, j 处
     def isLegal(self, num, i, j):
         if num in self.find_candidate_list(i, j):
+            return True
+        else:
+            return False
+    
+    # 检验 i,j 处num值的合法性
+
+    def isCorrect(self, num, i, j):
+        x_dict = collections.Counter(matrix[i])
+        y_dict = collections.Counter([X[j] for X in matrix])
+        u_dict = collections.Counter(self.get_current_unit(i, j))
+        if x_dict[num]==1 and y_dict[num]==1 and u_dict[num]==1:
             return True
         else:
             return False
@@ -109,30 +111,19 @@ class NumberPlace():
     # 参数: pos 求解起始位置，区间 [1, 81]
     # 返回：True 求解完成， False 求解失败
     def backtracking(self, pos):
-        #print(" >>>>> ")
         while pos<82:
             i = int((pos-1)/9)
             j = (pos-1)%9
-            #print('current row and col: ',i, j)
             if matrix[i][j] == '':
                 candidate_list = self.find_candidate_list(i, j)
-                #print("candidate:",candidate_list)
                 while len(candidate_list)>0:
-                    #matrix[i][j] = candidate_list.pop() # 固定求解，每次解出的答案均相同
                     matrix[i][j] = candidate_list.pop(random.randint(0,len(candidate_list)-1)) # 不定求解，从候选集中随机抽取
-                    #print("candidate:",candidate_list)
-                    #print(matrix)
-                    #input()
-                    if self.backtracking(pos+1): # 递归
-                        #print("<<<< True") # 计算成功，逐级返回
+                    if self.backtracking(pos+1):
                         return True;
-                    matrix[i][j] = '' # 如果下层没有成功，则清除本次试值
-                #print("<<<< False")
+                    matrix[i][j] = '' 
                 return False
             else:
                 pos+=1
-        # end while
-        #print("<<<< End")
         return True
 
         
@@ -143,7 +134,7 @@ class Application(tk.Frame):
         super().__init__(master)
         self.pack()
         
-        self.np = NumberPlace() # 数独 成员对象
+        self.np = NumberPlace() 
         self.create_widgets()
         
     def create_widgets(self):
@@ -151,8 +142,8 @@ class Application(tk.Frame):
         # ====左侧框架====
         frameLeft = tk.Frame(self)
         frameLeft.pack(side="left", fill="y")
-        validateCMD = frameLeft.register(self.cmd_validate) # 将响应函数注册到组件
-        self.entries = [[None for col in range(9)] for row in range(9)] # 生成空列表(二维)
+        validateCMD = frameLeft.register(self.cmd_validate) 
+        self.entries = [[None for col in range(9)] for row in range(9)] 
         for i in range(9):
             for j in range(9):
                 if (i in [3, 4, 5] and j not in [3, 4, 5]) or (j in [3, 4, 5] and i not in [3, 4, 5]):
@@ -175,16 +166,16 @@ class Application(tk.Frame):
         # ====出题====
         lF_difficulty = tk.LabelFrame(frameRight, text="出题", width=200, font=widget_font)
         lF_difficulty.grid(row=1, column=0, columnspan=2, sticky="w", padx=5, pady=5)
-        self.iv_dif = tk.IntVar() # 定义成员变量保存选项值
+        self.iv_dif = tk.IntVar() 
         self.iv_dif.set(1)
         # 难度单选框
         rb_diff_0 = tk.Radiobutton(lF_difficulty, text="入门", variable=self.iv_dif, value=1, font=widget_font)
         rb_diff_0.pack()
-        rb_diff_1 = tk.Radiobutton(lF_difficulty, text="容易", variable=self.iv_dif, value=2, font=widget_font)
+        rb_diff_1 = tk.Radiobutton(lF_difficulty, text="容易", variable=self.iv_dif, value=3, font=widget_font)
         rb_diff_1.pack()
-        rb_diff_2 = tk.Radiobutton(lF_difficulty, text="进阶", variable=self.iv_dif, value=3, font=widget_font)
+        rb_diff_2 = tk.Radiobutton(lF_difficulty, text="进阶", variable=self.iv_dif, value=5, font=widget_font)
         rb_diff_2.pack()
-        rb_diff_3 = tk.Radiobutton(lF_difficulty, text="大师", variable=self.iv_dif, value=4, font=widget_font)
+        rb_diff_3 = tk.Radiobutton(lF_difficulty, text="大师", variable=self.iv_dif, value=8, font=widget_font)
         rb_diff_3.pack()   
         # 生成按钮
         btn_begin = tk.Button(lF_difficulty, text="     生成题目     ", font=widget_font, command=self.cmd_generate)
@@ -211,22 +202,29 @@ class Application(tk.Frame):
         
     # 事件响应函数：提交验证
     def cmd_check(self):
-        self.updateMatrix
-        #for i in range(i):
+        usetime = time.time()-self.starttime 
+        wrongNum = 0 
+        for i in range(9):
+            for j in range(9):
+                if self.np.isCorrect(matrix[i][j], i, j):
+                    continue
+                else:
+                    wrongNum+=1
+        factor = self.iv_dif.get()/10 
+        score = 100-int(usetime/(120*factor))-wrongNum 
+        tk.messagebox.showinfo('检查结果', '耗时：'+str(round(usetime/60,1))+'分钟 \n错题数：'+str(wrongNum)+'\n得分：'+str(score))
+
     
     
     # 事件响应函数：清空数格
     def cmd_clean(self):
         self.np.clean()
-        print(matrix)
         self.updateEntries()
-        pass
     
     # 事件响应函数：求解数独
     def cmd_resolve(self):
         self.updateMatrix()
-        if self.np.backtracking(1): # 格子编号 1~81
-            print("求解成功！")
+        if self.np.backtracking(1): 
             self.updateEntries()
         else:
             print("求解失败！")
@@ -234,10 +232,8 @@ class Application(tk.Frame):
      
     # 事件响应函数：生成题目
     def cmd_generate(self):
-        #self.np.reset(1)
-        global matrix
-        matrix = [['', 1, '', '', '', 8, 4, '', 7], [9, 5, '', '', '', '', '', '', ''], ['', '', 8, '', 1, '', '', '', ''], ['', 8, 2, '', '', '', '', '', ''], [7, '', '', 4, '', 6, '', '', 8], ['', '', '', '', '', '', 6, 2, ''], ['', '', '', '', 5, '', 7, '', ''], ['', '', '', '', '', '', '', 8, 2], [5, '', 3, 2, '', '', '', 1, '']]
-        print(matrix)
+        self.starttime = time.time()
+        self.np.reset(self.iv_dif.get())
         self.updateEntries()
 
     # 事件响应函数：退出程序
@@ -248,17 +244,17 @@ class Application(tk.Frame):
     def cmd_validate(self, content, rowStr, colStr):
         rowNum = int(rowStr)
         colNum = int(colStr)
-        if content.isdigit(): # 如果是数字和空值
-            if int(content)>0 and int(content)<=9: # 如果是 [1,9] 区间
-                if self.np.isLegal(int(content), rowNum, colNum): # 验证输入是否合法
-                    matrix[rowNum][colNum] = int(content) # 更新文本框中的数字到矩阵
+        if content.isdigit(): 
+            if int(content)>0 and int(content)<=9: 
+                if self.np.isLegal(int(content), rowNum, colNum): 
+                    matrix[rowNum][colNum] = int(content) 
                 else:
                     self.replaceEntry(rowNum, colNum)
             else:
                 self.replaceEntry(rowNum, colNum)
         elif content == '':
             matrix[rowNum][colNum] = ''
-        else: # 用矩阵值恢复输入框原值
+        else: 
             self.replaceEntry(rowNum, colNum)
 
         print(matrix)
@@ -279,14 +275,13 @@ class Application(tk.Frame):
     
     # 在i行j列处更新 entry
     def replaceEntry(self, i, j):
-        self.entries[i][j].delete(0, 100) # 删除数字
-        self.entries[i][j].insert(0, matrix[i][j]) # 从矩阵更新的文本框
+        self.entries[i][j].delete(0, 100)
+        self.entries[i][j].insert(0, matrix[i][j])
        
 
 if __name__ == '__main__':
     root = tk.Tk()
     root.title("欢迎光临数独游戏")
-    #root.geometry("900x710")
     root.iconbitmap("number.ico")
     app = Application(master=root)
     app.mainloop()
