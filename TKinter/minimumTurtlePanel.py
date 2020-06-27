@@ -34,7 +34,7 @@ class Application(tk.Frame):
         
         # 画布面板
         self.frameCanvas = tk.Frame(self, highlightbackground='#FF0000', highlightcolor='#FF0000', highlightthickness=1, )
-        self.frameCanvas.pack(side='right', fill='y')
+        self.frameCanvas.pack(side='right', fill='x')
         
         # 画布
         # 画布大小决定窗口大小，超出屏幕区域时不会出现滚动条
