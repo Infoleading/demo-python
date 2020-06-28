@@ -27,8 +27,8 @@ class Application(tk.Frame):
         self.canvas = tk.Canvas(frameCanvas, width=1000, height=800, bg='#000000')
         self.canvas.pack()
         
-        self.btn_Quit = tk.Button(framePanel, text='画三角形', command=self.cmd_shape_trangle)
-        self.btn_Quit.pack(side="top", fill='y')
+        self.btn_shape_trangle = tk.Button(framePanel, text='画三角形', command=self.cmd_shape_trangle)
+        self.btn_shape_trangle.pack(side="top", fill='y')
         
     def cmd_quit(self):
         self.master.destroy()
