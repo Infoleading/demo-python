@@ -34,6 +34,7 @@ class Lsystem():
         # 状态栈
         # 用List来充当栈，仅用其 append 和 pop 方法操作，实现绘图状态的保存
         self.state_stack = []
+        self.running = True # 终止绘制
 
     # 拆分路径为符号列表
     def split(self, path):
@@ -53,7 +54,9 @@ class Lsystem():
         pathList = self.split(path)
         for symbol in pathList:
             # 前进单位长度并划线
-            if symbol == 'F' or symbol == 'Fr' or symbol == 'Fl':
+            if self.running == False:
+                return
+            elif symbol == 'F' or symbol == 'Fr' or symbol == 'Fl':
                 turtle.down()
                 turtle.forward(length)
             # 前进单位长度但不划线
@@ -110,7 +113,8 @@ class Lsystem():
                 angle -= angleIncrement
             # 通过转弯角度增量来增加转弯角度
             elif symbol == ')':
-                angle += angleIncrement    
+                angle += angleIncrement
+            
         
     # 应用规则
     # 用规则替换路径中的符号
