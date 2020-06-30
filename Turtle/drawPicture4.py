@@ -99,17 +99,13 @@ if __name__ == "__main__":
     # 设置模型规则
     length = 300
     angle = 20
-    path = 'VZFFF'
+    path = 'F'
     rule = {
-        'V':'[+++W][---W]YV',
-        'W':'+X[-W]Z',
-        'X':'-W[+X]Z',
-        'Y':'YZ',
-        'Z':'[-FFF][+FFF]F'
+        'F':'F-F'
         }
     
     # 生成路径
-    n = 10 # 应用规则次数 [0,~]
+    n = 6 # 应用规则次数 [0,~]
     for i in range(n):
         path = apply_rule(rule,path)
     print(path)
