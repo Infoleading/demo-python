@@ -1,6 +1,6 @@
 import RPi.GPIO as GPIO
 import time
-import ultraSonic as sonic
+import ultra_sonic as sonic
 import buzzer
 
 pin_buzzer = 16

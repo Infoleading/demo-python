@@ -24,7 +24,7 @@ def alarm():
     g = 0
     b = 0
     f = 50
-    f_ = 1
+    f_ = 0.5
 
     pwm_buzzer.start(50)
 

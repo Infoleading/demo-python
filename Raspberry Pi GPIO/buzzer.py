@@ -14,7 +14,7 @@ def bee(pin_b, frequency, duration):
 def main():
     try:
         while True:
-            bee(16, 300, 3)
+            bee(pin_buzzer, 50, 3)
     except KeyboardInterrupt:
         GPIO.cleanup()
     

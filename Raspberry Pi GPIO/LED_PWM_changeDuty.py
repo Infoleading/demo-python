@@ -1,13 +1,13 @@
 import RPi.GPIO as GPIO
 import time
 
-pin_led = 21
+pin_led = 19
 
 GPIO.setwarnings(False)
 GPIO.setmode(GPIO.BCM)
 GPIO.setup(pin_led, GPIO.OUT)
 
-pwm = GPIO.PWM(pin_led, 50)
+pwm = GPIO.PWM(pin_led, 100)
 pwm.start(0)
 
 try:
